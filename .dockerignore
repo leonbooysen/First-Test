@@ -1,0 +1,40 @@
+# Git and IDE
+.git
+.gitignore
+.vscode
+.venv
+venv
+env
+
+# Python
+__pycache__
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.so
+.pytest_cache
+.mypy_cache
+.coverage
+htmlcov
+
+# Secrets and local config (inject via Fargate env / Secrets Manager)
+.env
+.env.*
+!.env.example
+config.json
+config.json_bckup
+*.local.json
+secrets.json
+
+# Docs and dev
+*.md
+!README.md
+Dockerfile*
+.dockerignore
+docker-compose*.yml
+*.log
+
+# OS
+.DS_Store
+Thumbs.db

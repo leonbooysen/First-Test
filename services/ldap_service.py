@@ -86,12 +86,41 @@ def find_user(input_user: str) -> Optional[Tuple[str, str]]:
         logger.warning("AD FindUser failed input=%s: %s", input_user, e)
         return None
 
+def _normalize_for_match(s: str) -> str:
+    """Lowercase and collapse spaces/hyphens/underscores so 'VPN MFA Reset' and 'vpn-mfa-registration-reset' can match."""
+    if not s:
+        return ""
+    return "".join(c for c in s.strip().lower().replace(" ", "").replace("-", "").replace("_", "") if c.isalnum())
+
+
+def _cn_from_dn(dn: str) -> str:
+    """Extract CN value from DN (e.g. 'CN=VPN MFA Reset,OU=Groups,DC=...' -> 'VPN MFA Reset')."""
+    if not dn or "=" not in dn:
+        return ""
+    # First component is usually CN=...
+    first = dn.split(",")[0].strip()
+    if first.upper().startswith("CN="):
+        return first[3:].strip()
+    return first
+
+
 def is_in_member_of(member_of_dns: list[str], group_sam_name: str) -> bool:
-    """Return True if the user is in the group. Matches when group_sam_name appears in any memberOf DN (AD often uses display name for CN, so strict CN= match can fail)."""
+    """Return True if the user is in the group. Matches DN or CN against group_sam_name (config may be sAMAccountName or display name)."""
     if not (group_sam_name or "").strip():
         return False
-    needle = group_sam_name.strip().upper()
+    needle_norm = _normalize_for_match(group_sam_name)
+    if not needle_norm:
+        return False
     for dn in member_of_dns or []:
-        if dn and needle in (dn.strip().upper()):
+        if not dn:
+            continue
+        # Full DN: normalize same way so sAMAccountName in CN matches (e.g. CN=jdg-adfs-vpn-mfa-reset,...)
+        dn_norm = _normalize_for_match(dn)
+        if needle_norm in dn_norm:
+            return True
+        # CN often has display name: check normalized CN vs config (e.g. 'VPN MFA Reset' vs 'vpn-mfa-registration-reset')
+        cn = _cn_from_dn(dn)
+        cn_norm = _normalize_for_match(cn)
+        if cn_norm and (needle_norm in cn_norm or cn_norm in needle_norm):
             return True
     return False

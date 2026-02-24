@@ -7,44 +7,49 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/site.css') }}" />
 </head>
-<body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-dark bg-primary border-bottom box-shadow mb-3">
-            <div class="container">
-                <a class="navbar-brand d-flex align-items-center" href="{{ url_for('home.index') }}">
-                    <img src="{{ url_for('static', filename='images/pepkor-logo.png') }}" alt="Pepkor Lifestyle" style="height:32px;" class="me-2" />
-                    <span>MFA Reset Portal</span>
-                </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item"><a class="nav-link" href="{{ url_for('home.index') }}">Home</a></li>
-                    </ul>
-                    <ul class="navbar-nav">
-                        {% if session.get('user') %}
-                        <li class="nav-item"><span class="nav-link text-light">{{ session.user }}</span></li>
-                        <li class="nav-item">
-                            <form action="{{ url_for('account.logout') }}" method="post" class="d-inline">
-                                <input type="hidden" name="return_url" value="{{ request.url }}" />
-                                <button type="submit" class="btn btn-link nav-link text-light">Logout</button>
-                            </form>
-                        </li>
-                        {% endif %}
-                    </ul>
-                </div>
-            </div>
+<body class="app-layout">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <a href="{{ url_for('home.index') }}" class="sidebar-logo">
+                <img src="{{ url_for('static', filename='images/pepkor-logo.png') }}" alt="Pepkor" class="sidebar-logo-img" />
+            </a>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('home.index') }}" class="sidebar-link{% if request.endpoint == 'home.index' %} active{% endif %}">Dashboard</a>
+            {% if session.get('roles') and 'AppMfaReset' in session.get('roles') %}
+            <a href="{{ url_for('applications_mfa.reset') }}" class="sidebar-link{% if request.endpoint and request.endpoint.startswith('applications_mfa') %} active{% endif %}">Applications MFA Reset</a>
+            {% endif %}
+            {% if session.get('roles') and 'VpnMfaReset' in session.get('roles') %}
+            <a href="{{ url_for('vpn_mfa.reset') }}" class="sidebar-link{% if request.endpoint and request.endpoint.startswith('vpn_mfa') %} active{% endif %}">VPN MFA Reset</a>
+            {% endif %}
+            {% if session.get('roles') and 'OtpSet' in session.get('roles') %}
+            <a href="{{ url_for('set_otp.reset') }}" class="sidebar-link{% if request.endpoint and request.endpoint.startswith('set_otp') %} active{% endif %}">Set OTP</a>
+            {% endif %}
         </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
+        {% if session.get('user') %}
+        <div class="sidebar-footer">
+            <div class="sidebar-user">
+                <div class="sidebar-user-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                </div>
+                <div class="sidebar-user-name">{{ session.user }}</div>
+                {% if session.get('user_id') %}<div class="sidebar-user-id">{{ session.user_id }}</div>{% endif %}
+                <form action="{{ url_for('account.logout') }}" method="post" class="sidebar-logout-form">
+                    <input type="hidden" name="return_url" value="{{ request.url }}" />
+                    <button type="submit" class="sidebar-logout">Log out <span class="sidebar-logout-arrow">→</span></button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+    </aside>
+    <div class="main-content">
+        <main role="main" class="main-inner">
             {% block content %}{% endblock %}
         </main>
+        <footer class="main-footer text-muted">
+            &copy; {{ year }} - MFA Reset Portal
+        </footer>
     </div>
-    <footer class="border-top footer text-muted">
-        <div class="container">&copy; {{ year }} - MFA Reset Portal</div>
-    </footer>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     {% block scripts %}{% endblock %}
 </body>

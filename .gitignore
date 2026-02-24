@@ -43,6 +43,14 @@ bld/
 [Ll]og/
 [Ll]ogs/
 
+## Python
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+.env
+.env.local
+
 ## Secrets
 appsettings.*.local.json
 secrets.json

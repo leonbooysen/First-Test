@@ -68,10 +68,57 @@ Then open: **http://localhost:5000**
 
 - **Debug mode:** `export FLASK_DEBUG=1` then `python app.py`
 
+## Docker & AWS Fargate
+
+The app runs in production with **Gunicorn** and listens on **PORT** (default **8080**). A **/health** endpoint is provided for ALB/Fargate health checks.
+
+### Build and run locally
+
+```bash
+docker build -t mfa-reset-portal .
+docker run -p 8080:8080 \
+  -e FLASK_SECRET_KEY=your-secret \
+  -e FLASK_ENV=production \
+  -e MFA_APPS_DB_SERVER=your-sql-server \
+  -e MFA_APPS_DB_NAME=MFADatabase \
+  -e MFA_APPS_DB_USER=user \
+  -e MFA_APPS_DB_PASSWORD=pass \
+  -e MFA_LDAP_SERVER=your-dc.example.com \
+  -e MFA_LDAP_BIND_USER=user \
+  -e MFA_LDAP_BIND_PASSWORD=pass \
+  -e MFA_LDAP_SEARCH_BASE=DC=company,DC=com \
+  mfa-reset-portal
+```
+
+Then open **http://localhost:8080**. Health check: **http://localhost:8080/health**.
+
+### AWS Fargate
+
+1. **Push image to ECR**
+
+   ```bash
+   aws ecr get-login-password --region REGION | docker login --username AWS --password-stdin ACCOUNT.dkr.ecr.REGION.amazonaws.com
+   docker tag mfa-reset-portal:latest ACCOUNT.dkr.ecr.REGION.amazonaws.com/mfa-reset-portal:latest
+   docker push ACCOUNT.dkr.ecr.REGION.amazonaws.com/mfa-reset-portal:latest
+   ```
+
+2. **Task definition**
+
+   - Container port: **8080** (match `PORT` or leave default).
+   - **Required env in task:** `FLASK_ENV=production`, `FLASK_SECRET_KEY` (use Secrets Manager or SSM for the key).
+   - Add all `MFA_*` and `MFA_APPS_DB_*` / `MFA_LDAP_*` variables (or mount `config.json` from S3/Secrets Manager if you prefer file-based config).
+   - **Health check:** path `/health`, port 8080, interval 30s, timeout 5s, healthy threshold 2, unhealthy 3.
+
+3. **ALB**
+
+   - Target group: port 8080, health check path `/health`.
+   - Ensure the Fargate security group allows inbound from the ALB and outbound to your MSSQL and LDAP/AD.
+
 ## Project layout
 
 - `app.py` – Flask app entry point
-- `config.py` – Loads `config.json` (or `MFA_CONFIG`)
+- `run_gunicorn.py` – Gunicorn config (bind, workers, PORT)
+- `config.py` – Loads `config.json` (or `MFA_CONFIG`) and env
 - `auth.py` – `@login_required`, `@role_required("AppMfaReset")` etc.
 - `routes/` – Blueprints: `account`, `home`, `applications_mfa`
 - `services/ldap_service.py` – AD bind, validate credentials, get memberOf, find user
