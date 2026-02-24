@@ -1,15 +1,4 @@
 {
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=pl-adfs-apps-mssql-test.cyidwyboglcm.af-south-1.rds.amazonaws.com;Database=MFADatabase;TrustServerCertificate=yes;uid=jdg-adfs-mfa-reset-user;pwd=AsdfgQwert!2345;driver=ODBC Driver 18 for SQL Server"
-  },
-  "AD": {
-    "LdapServer": "jdgdc2.jdg.co.za",
-    "LdapPort": 389,
-    "UseLdaps": false,
-    "BindUser": "jdg\\227123",
-    "BindPassword": "Q11*LLyouG))DD*Y*36",
-    "SearchBase": "DC=jdg,DC=co,DC=za"
-  },
   "ADGroups": {
     "AppMfaReset": "jdg-adfs-mfa-registration-reset",
     "VpnMfaReset": "jdg-adfs-vpn-mfa-registration-reset",

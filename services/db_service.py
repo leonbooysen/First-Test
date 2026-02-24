@@ -4,7 +4,7 @@ import pyodbc
 from contextlib import contextmanager
 from typing import Callable
 
-from config import get_connection_string, get_vpn_connection_string
+from config import get_connection_string, get_vpn_connection_string, get_otp_connection_string
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +24,7 @@ def _cursor_ctx(connection_string_getter: Callable[[], str]):
 
 get_cursor = _cursor_ctx(get_connection_string)
 get_vpn_cursor = _cursor_ctx(get_vpn_connection_string)
+get_otp_cursor = _cursor_ctx(get_otp_connection_string)
 
 def is_registered(upn: str) -> bool:
     """Check if UPN exists in dbo.REGISTRATIONS (Applications DB)."""
@@ -46,17 +47,17 @@ def insert_audit(logged_in_id: str, mfa_id: str) -> None:
         )
 
 def insert_registration_otp(upn: str, cellfull: str) -> None:
-    """Insert OTP registration into dbo.REGISTRATIONS (Applications DB). MAILADDRESS = cell + @sms.jdg.co.za. PIN=1234, ENABLED=1, METHOD=2, ROLE=OTP."""
+    """Insert OTP registration into dbo.REGISTRATIONS (OTP DB or Applications DB). MAILADDRESS = cell + @sms.jdg.co.za. PIN=1234, ENABLED=1, METHOD=2, ROLE=OTP."""
     mailaddress = f"{cellfull.strip()}@sms.jdg.co.za" if cellfull else "@sms.jdg.co.za"
-    with get_cursor() as cur:
+    with get_otp_cursor() as cur:
         cur.execute(
             "INSERT INTO dbo.REGISTRATIONS (UPN, MAILADDRESS, PIN, ENABLED, METHOD, ROLE) VALUES (?, ?, '1234', '1', '2', 'OTP')",
             (upn, mailaddress),
         )
 
 def insert_audit_otp_add(logged_in_id: str, mfa_id: str) -> None:
-    """Insert into dbo.JDG_MFA_OTP_USER_ADD_AUDIT (Applications DB)."""
-    with get_cursor() as cur:
+    """Insert into dbo.JDG_MFA_OTP_USER_ADD_AUDIT (OTP DB or Applications DB)."""
+    with get_otp_cursor() as cur:
         cur.execute(
             "INSERT INTO dbo.JDG_MFA_OTP_USER_ADD_AUDIT (logged_in_id, mfa_id) VALUES (?, ?)",
             (logged_in_id, mfa_id),
