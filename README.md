@@ -31,7 +31,7 @@ This is the Python 3 version of the MFA Reset Portal. It provides the same behav
    ```json
    {
      "ConnectionStrings": {
-       "DefaultConnection": "Server=YOUR_SERVER;Database=MFADatabase;TrustServerCertificate=True;uid=USER;pwd=PASSWORD;driver=ODBC Driver 18 for SQL Server"
+       "DefaultConnection": "Server=YOUR_SERVER;Database=MFADDB;TrustServerCertificate=True;uid=USER;pwd=PASSWORD;driver=ODBC Driver 18 for SQL Server"
      },
      "AD": {
        "LdapServer": "your-dc.example.com",
@@ -39,12 +39,12 @@ This is the Python 3 version of the MFA Reset Portal. It provides the same behav
        "UseLdaps": false,
        "BindUser": "service@jdg.co.za",
        "BindPassword": "...",
-       "SearchBase": "DC=jdg,DC=co,DC=za"
+       "SearchBase": "DC=company,DC=co,DC=za"
      },
      "ADGroups": {
-       "AppMfaReset": "jdg-adfs-mfa-registration-reset",
-       "VpnMfaReset": "jdg-adfs-vpn-mfa-registration-reset",
-       "OtpSet": "jdg-adfs-mfa-user-otp-registration-add"
+       "AppMfaReset": "mfa-registration-reset",
+       "VpnMfaReset": "vpn-mfa-registration-reset",
+       "OtpSet": "mfa-user-otp-registration-add"
      }
    }
    ```
@@ -79,13 +79,3 @@ Then open: **http://localhost:5000**
 - `templates/` – Jinja2 (base, login, home, applications_mfa reset/confirm/success, access_denied)
 - `static/` – CSS, images
 
-## Removing the .NET app
-
-If you no longer need the .NET Core version, you can delete:
-
-- `Controllers/`, `Views/`, `Models/`, `Data/`, `Services/`, `Migrations/`, `Security/`
-- `Program.cs`, `MfaResetPortal.csproj`, `appsettings.json`, `appsettings.Development.json`
-- `Properties/`, `wwwroot/` (after copying any assets you need into `static/`)
-- `bin/`, `obj/`, `libman.json`
-
-Keep `config.json` and this README for the Python app.
