@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Applications MFA Reset - MFA Reset Portal{% endblock %}
+{% block content %}
+<h1>Applications MFA Reset</h1>
+<p class="text-muted">Enter the username of the user whose MFA you want to reset.</p>
+<div class="row">
+    <div class="col-md-6">
+        <form action="{{ url_for('applications_mfa.lookup') }}" method="post">
+            {% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+            <div class="mb-3">
+                <label for="InputUsername" class="form-label">Username</label>
+                <input type="text" id="InputUsername" name="InputUsername" class="form-control" placeholder="sAMAccountName or UPN" value="{{ input_username or '' }}" />
+            </div>
+            <button type="submit" class="btn btn-primary">Look Up User</button>
+            <a href="{{ url_for('home.index') }}" class="btn btn-outline-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

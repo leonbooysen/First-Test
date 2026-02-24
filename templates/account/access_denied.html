@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Access Denied - MFA Reset Portal{% endblock %}
+{% block content %}
+<div class="text-center py-5">
+    <h1 class="display-4 text-danger">Access Denied</h1>
+    <p class="lead mt-3">You do not have permission to view this page.</p>
+    <div class="mt-4">
+        <a href="{{ url_for('home.index') }}" class="btn btn-primary">Back to Home</a>
+    </div>
+</div>
+{% endblock %}

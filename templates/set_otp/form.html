@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Set OTP – Cell Number - MFA Reset Portal{% endblock %}
+{% block content %}
+<h1>Set OTP</h1>
+<p class="text-muted">Enter the user's cell number for OTP. Please use country code format (e.g. +2782..., +2762...).</p>
+<div class="row">
+    <div class="col-md-6">
+        <form action="{{ url_for('set_otp.submit') }}" method="post">
+            {% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+            <div class="mb-3">
+                <label class="form-label">User (UPN)</label>
+                <input type="text" class="form-control" value="{{ upn }}" readonly disabled />
+                <input type="hidden" name="UPN" value="{{ upn }}" />
+                <input type="hidden" name="SamAccountName" value="{{ sam_account_name }}" />
+                <input type="hidden" name="DisplayName" value="{{ display_name }}" />
+            </div>
+            <div class="mb-3">
+                <label for="CellNumber" class="form-label">Cell number (with country code)</label>
+                <input type="text" id="CellNumber" name="CellNumber" class="form-control" placeholder="+27821234567 or +27621234567" value="{{ cell_value or '' }}" />
+                <div class="form-text">Please use country code format (+2782..., +2762..., etc.).</div>
+            </div>
+            <button type="submit" class="btn btn-primary">Set OTP</button>
+            <a href="{{ url_for('set_otp.reset') }}" class="btn btn-outline-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

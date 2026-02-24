@@ -1,0 +1,53 @@
+@model ApplicationsMfaResetViewModel
+@{
+    ViewData["Title"] = "Confirm MFA Reset";
+}
+
+<h1>Confirm MFA Reset</h1>
+
+<div class="card mb-4">
+    <div class="card-header">User Found in Active Directory</div>
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">sAMAccountName</dt>
+            <dd class="col-sm-9">@Model.SamAccountName</dd>
+
+            <dt class="col-sm-3">Display Name</dt>
+            <dd class="col-sm-9">@(Model.DisplayName ?? "-")</dd>
+
+            <dt class="col-sm-3">MFA Registered</dt>
+            <dd class="col-sm-9">
+                @if (Model.IsRegistered)
+                {
+                    <span class="badge bg-warning text-dark">Yes - registered in Applications MFA</span>
+                }
+                else
+                {
+                    <span class="badge bg-secondary">No - not registered</span>
+                }
+            </dd>
+        </dl>
+    </div>
+</div>
+
+@if (Model.IsRegistered)
+{
+    <div class="alert alert-warning">
+        <strong>Warning:</strong> Deleting the MFA registration will require the user to re-register for MFA.
+    </div>
+    <form asp-action="Delete" method="post">
+        <input type="hidden" asp-for="InputUsername" />
+        <input type="hidden" asp-for="SamAccountName" />
+        <input type="hidden" asp-for="DisplayName" />
+        <input type="hidden" asp-for="IsRegistered" />
+        <button type="submit" class="btn btn-danger">Yes, Delete MFA Registration</button>
+        <a asp-action="Reset" class="btn btn-outline-secondary">Cancel</a>
+    </form>
+}
+else
+{
+    <div class="alert alert-info">
+        This user is not registered for Applications MFA. No action needed.
+    </div>
+    <a asp-action="Reset" class="btn btn-primary">Look Up Another User</a>
+}

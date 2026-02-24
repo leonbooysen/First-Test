@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Confirm - Set OTP - MFA Reset Portal{% endblock %}
+{% block content %}
+<h1>Set OTP - Confirm</h1>
+<div class="card mb-4">
+    <div class="card-header">User Found in Active Directory</div>
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">sAMAccountName</dt>
+            <dd class="col-sm-9">{{ sam_account_name }}</dd>
+            <dt class="col-sm-3">Display Name</dt>
+            <dd class="col-sm-9">{{ display_name or '-' }}</dd>
+            <dt class="col-sm-3">UPN</dt>
+            <dd class="col-sm-9">{{ upn }}</dd>
+            <dt class="col-sm-3">MFA Registered</dt>
+            <dd class="col-sm-9">
+                {% if is_registered %}
+                <span class="badge bg-warning text-dark">Yes - registered</span>
+                {% else %}
+                <span class="badge bg-secondary">No - not registered</span>
+                {% endif %}
+            </dd>
+        </dl>
+    </div>
+</div>
+{% if is_registered %}
+<div class="alert alert-warning"><strong>Reset first:</strong> This user is registered. Delete their MFA registration, then you can set OTP (cell number).</div>
+<form action="{{ url_for('set_otp.delete') }}" method="post">
+    <input type="hidden" name="SamAccountName" value="{{ sam_account_name }}" />
+    <input type="hidden" name="DisplayName" value="{{ display_name }}" />
+    <button type="submit" class="btn btn-danger">Yes, Reset Then Set OTP</button>
+    <a href="{{ url_for('set_otp.reset') }}" class="btn btn-outline-secondary">Cancel</a>
+</form>
+{% else %}
+<div class="alert alert-info">This user is not registered. You can add OTP registration for them.</div>
+<a href="{{ url_for('set_otp.form', upn=upn, sam=sam_account_name, display_name=display_name) }}" class="btn btn-primary">Set OTP</a>
+<a href="{{ url_for('set_otp.reset') }}" class="btn btn-outline-secondary">Cancel</a>
+{% endif %}
+{% endblock %}
